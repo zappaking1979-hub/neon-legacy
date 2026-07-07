@@ -1,7 +1,6 @@
 package crime
 
 import (
-	"math"
 	"math/rand"
 )
 
