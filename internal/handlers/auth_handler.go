@@ -45,7 +45,7 @@ func (h *AuthHandler) LoginPage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 		return
 	}
-	h.tmpl.ExecuteTemplate(w, "login.html", nil)
+	h.tmpl.ExecuteTemplate(w, "pages/login.html", nil)
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +66,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	session, _, err := h.authService.Login(r.Context(), form.Email, form.Password)
 	if err != nil {
-		h.tmpl.ExecuteTemplate(w, "login.html", map[string]string{"error": err.Error()})
+		h.tmpl.ExecuteTemplate(w, "pages/login.html", map[string]string{"error": err.Error()})
 		return
 	}
 
@@ -88,7 +88,7 @@ func (h *AuthHandler) RegisterPage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/dashboard", http.StatusSeeOther)
 		return
 	}
-	h.tmpl.ExecuteTemplate(w, "register.html", nil)
+	h.tmpl.ExecuteTemplate(w, "pages/register.html", nil)
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -111,7 +111,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	p, err := h.authService.Register(r.Context(), form.Email, form.Username, form.Password, player.Gender(form.Gender))
 	if err != nil {
-		h.tmpl.ExecuteTemplate(w, "register.html", map[string]string{"error": err.Error()})
+		h.tmpl.ExecuteTemplate(w, "pages/register.html", map[string]string{"error": err.Error()})
 		return
 	}
 
@@ -153,7 +153,7 @@ func (h *AuthHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.tmpl.ExecuteTemplate(w, "dashboard.html", map[string]interface{}{
+	h.tmpl.ExecuteTemplate(w, "pages/dashboard.html", map[string]interface{}{
 		"Player": p,
 		"welcome": r.URL.Query().Get("welcome"),
 	})

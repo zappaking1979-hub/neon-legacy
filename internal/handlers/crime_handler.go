@@ -72,7 +72,7 @@ func (h *CrimeHandler) Page(w http.ResponseWriter, r *http.Request) {
 		entries = append(entries, entry)
 	}
 
-	h.tmpl.ExecuteTemplate(w, "crimes.html", crimesPageData{
+	h.tmpl.ExecuteTemplate(w, "pages/crimes.html", crimesPageData{
 		Player: p,
 		Crimes: entries,
 	})
@@ -112,7 +112,7 @@ func (h *CrimeHandler) DoCrime(w http.ResponseWriter, r *http.Request) {
 	p, _ = h.playerRepo.GetByID(r.Context(), p.ID)
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	h.tmpl.ExecuteTemplate(w, "crime_result.html", crimeResultData{
+	h.tmpl.ExecuteTemplate(w, "partials/crime_result.html", crimeResultData{
 		Player:   p,
 		Success:  result.Success,
 		Jailed:   result.Jailed,
