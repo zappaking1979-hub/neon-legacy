@@ -10,6 +10,8 @@ import (
 	"github.com/neonlegacy/server/internal/domain/player"
 )
 
+const playersColumns = "SELECT id, email, username, password_hash, gender, created_at, last_active_at, level, prestige, exp, exp_max, hp, hp_max, energy, energy_max, nerve, nerve_max, awake, awake_max, strength, defense, speed, agility, cash, bank, points, credits, gang_id, hospital_time, jail_time FROM players"
+
 type PlayerRepo struct {
 	pool *pgxpool.Pool
 }
@@ -54,15 +56,15 @@ func (r *PlayerRepo) Create(ctx context.Context, p *player.Player) error {
 }
 
 func (r *PlayerRepo) GetByID(ctx context.Context, id uuid.UUID) (*player.Player, error) {
-	return r.scanOne(ctx, r.pool.QueryRow(ctx, "SELECT * FROM players WHERE id = $1", id))
+	return r.scanOne(ctx, r.pool.QueryRow(ctx, playersColumns+" WHERE id = $1", id))
 }
 
 func (r *PlayerRepo) GetByEmail(ctx context.Context, email string) (*player.Player, error) {
-	return r.scanOne(ctx, r.pool.QueryRow(ctx, "SELECT * FROM players WHERE email = $1", email))
+	return r.scanOne(ctx, r.pool.QueryRow(ctx, playersColumns+" WHERE email = $1", email))
 }
 
 func (r *PlayerRepo) GetByUsername(ctx context.Context, username string) (*player.Player, error) {
-	return r.scanOne(ctx, r.pool.QueryRow(ctx, "SELECT * FROM players WHERE username = $1", username))
+	return r.scanOne(ctx, r.pool.QueryRow(ctx, playersColumns+" WHERE username = $1", username))
 }
 
 func (r *PlayerRepo) Update(ctx context.Context, p *player.Player) error {
@@ -100,7 +102,7 @@ func (r *PlayerRepo) Delete(ctx context.Context, id uuid.UUID) error {
 }
 
 func (r *PlayerRepo) Search(ctx context.Context, query string, limit, offset int) ([]*player.Player, error) {
-	sql := "SELECT * FROM players WHERE username ILIKE $1 ORDER BY level DESC LIMIT $2 OFFSET $3"
+	sql := playersColumns + " WHERE username ILIKE $1 ORDER BY level DESC LIMIT $2 OFFSET $3"
 	rows, err := r.pool.Query(ctx, sql, "%"+query+"%", limit, offset)
 	if err != nil {
 		return nil, err
@@ -143,8 +145,8 @@ func scanPlayer(row scanner) (*player.Player, error) {
 		&p.Nerve, &p.NerveMax, &p.Awake, &p.AwakeMax,
 		&p.Strength, &p.Defense, &p.Speed, &p.Agility,
 		&p.Cash, &p.Bank, &p.Points, &p.Credits,
-		&p.HospitalTime, &p.JailTime,
 		&p.GangID,
+		&p.HospitalTime, &p.JailTime,
 	)
 	return p, err
 }
