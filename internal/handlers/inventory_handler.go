@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/neonlegacy/server/internal/application"
+	"github.com/neonlegacy/server/internal/domain/item"
 	"github.com/neonlegacy/server/internal/domain/player"
 	"github.com/neonlegacy/server/internal/middleware"
 )
@@ -30,7 +31,7 @@ func (h *InventoryHandler) Page(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type invItemEntry struct {
-		Item
+		item.Item
 		Quantity int
 	}
 	entries := make([]invItemEntry, 0, len(items))

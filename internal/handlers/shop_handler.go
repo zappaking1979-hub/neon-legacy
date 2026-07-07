@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/neonlegacy/server/internal/application"
+	"github.com/neonlegacy/server/internal/domain/item"
 	"github.com/neonlegacy/server/internal/domain/player"
 	"github.com/neonlegacy/server/internal/middleware"
 )
@@ -36,7 +37,7 @@ func (h *ShopHandler) Page(w http.ResponseWriter, r *http.Request) {
 	}
 
 	type shopItemEntry struct {
-		Item
+		item.Item
 		Owned int
 	}
 	entries := make([]shopItemEntry, 0, len(items))
@@ -80,7 +81,7 @@ func (h *ShopHandler) Buy(w http.ResponseWriter, r *http.Request) {
 		message = err.Error()
 	} else {
 		success = true
-		it, _ := h.shopService.itemRepo.GetByID(r.Context(), itemID)
+		it, _ := h.shopService.GetItem(r.Context(), itemID)
 		if it != nil {
 			message = "Bought " + it.Name + " x" + strconv.Itoa(quantity) + " for $" + strconv.FormatInt(it.BuyPrice*int64(quantity), 10)
 		} else {
@@ -124,7 +125,7 @@ func (h *ShopHandler) Sell(w http.ResponseWriter, r *http.Request) {
 		message = err.Error()
 	} else {
 		success = true
-		it, _ := h.shopService.itemRepo.GetByID(r.Context(), itemID)
+		it, _ := h.shopService.GetItem(r.Context(), itemID)
 		if it != nil {
 			message = "Sold " + it.Name + " x" + strconv.Itoa(quantity) + " for $" + strconv.FormatInt(it.SellPrice*int64(quantity), 10)
 		} else {

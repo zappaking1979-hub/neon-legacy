@@ -34,6 +34,14 @@ func (s *ShopService) ListItems(ctx context.Context) ([]item.Item, error) {
 	return s.itemRepo.List(ctx)
 }
 
+func (s *ShopService) GetItem(ctx context.Context, itemID int) (*item.Item, error) {
+	return s.itemRepo.GetByID(ctx, itemID)
+}
+
+func (s *ShopService) ListInventory(ctx context.Context, playerID uuid.UUID) ([]item.PlayerItem, error) {
+	return s.playerItemRepo.ListByPlayer(ctx, playerID)
+}
+
 func (s *ShopService) BuyItem(ctx context.Context, p *player.Player, itemID int, quantity int) error {
 	if quantity <= 0 {
 		return ErrInvalidQuantity
