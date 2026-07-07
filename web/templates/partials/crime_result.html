@@ -1,0 +1,46 @@
+{{define "crime_result.html"}}
+<div class="bg-gray-900 rounded-xl p-6 border border-gray-800 mt-4">
+    {{if .Jailed}}
+    <div class="bg-red-900/30 border border-red-800 text-red-300 px-4 py-3 rounded-lg mb-4">
+        <strong>Jailed!</strong> {{.Message}}
+    </div>
+    {{else if .Success}}
+    <div class="bg-green-900/30 border border-green-800 text-green-300 px-4 py-3 rounded-lg mb-4">
+        <strong>Success!</strong> {{.Message}}
+    </div>
+    <div class="grid grid-cols-2 gap-4 text-sm mt-3">
+        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+            <div class="text-green-400 font-mono text-lg">+${{printf "%d" .CashGain}}</div>
+            <div class="text-gray-500 text-xs mt-1">Cash earned</div>
+        </div>
+        <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+            <div class="text-cyan-400 font-mono text-lg">+{{.ExpGain}} EXP</div>
+            <div class="text-gray-500 text-xs mt-1">Experience</div>
+        </div>
+    </div>
+    {{else}}
+    <div class="bg-yellow-900/30 border border-yellow-800 text-yellow-300 px-4 py-3 rounded-lg">
+        <strong>Failed.</strong> {{.Message}}
+    </div>
+    {{end}}
+
+    <div class="mt-4 pt-4 border-t border-gray-800 text-sm" id="player-stats-after">
+        <div class="flex justify-between">
+            <span class="text-gray-400">Nerve</span>
+            <span class="font-mono text-red-400">{{.Player.Nerve}} / {{.Player.NerveMax}}</span>
+        </div>
+        <div class="flex justify-between mt-1">
+            <span class="text-gray-400">Cash</span>
+            <span class="font-mono text-green-400">${{printf "%d" .Player.Cash}}</span>
+        </div>
+        <div class="flex justify-between mt-1">
+            <span class="text-gray-400">Level</span>
+            <span class="font-mono text-cyan-400">{{.Player.Level}}</span>
+        </div>
+        <div class="flex justify-between mt-1">
+            <span class="text-gray-400">EXP</span>
+            <span class="font-mono">{{.Player.Exp}} / {{.Player.ExpMax}}</span>
+        </div>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,130 @@
+{{template "layout/base.html" .}}
+
+{{define "content"}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+        <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+            <div class="bg-gray-800/50 px-6 py-4 border-b border-gray-800">
+                <h1 class="font-bold">Crime Network</h1>
+                <p class="text-xs text-gray-500 mt-1">Select a crime, set multiplier, hold the button to repeat.</p>
+            </div>
+
+            <div class="p-6" x-data="crimeRunner()">
+                <form hx-post="/crimes/commit" hx-target="#crime-result" hx-trigger="submit" x-ref="form">
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-400 mb-2">Choose your crime</label>
+                        <select name="id" x-model="crimeId" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+                            <option value="">-- Select a crime --</option>
+                            {{range .Crimes}}
+                            <option value="{{.ID}}" data-cost="{{.NerveCost}}"
+                                {{if not .CanCommit}}disabled{{end}}>
+                                {{.Name}} ({{.NerveCost}} nerve)
+                                {{if .BlockedBy}}- {{.BlockedBy}}{{end}}
+                            </option>
+                            {{end}}
+                        </select>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-sm text-gray-400 mb-2">Multiplier</label>
+                        <div class="flex gap-2">
+                            <template x-for="n in [1,2,5,10]" :key="n">
+                                <button type="button" @click="multiplier = n"
+                                    :class="multiplier === n ? 'bg-cyan-600 border-cyan-500' : 'bg-gray-800 border-gray-700 hover:border-gray-600'"
+                                    class="flex-1 py-2 rounded-lg border text-sm font-mono transition">
+                                    <span x-text="n + 'x'"></span>
+                                </button>
+                            </template>
+                            <input type="hidden" name="cm" x-model="multiplier">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="submit" :disabled="!crimeId"
+                            class="flex-1 bg-green-700 hover:bg-green-600 disabled:bg-gray-800 disabled:text-gray-600 py-3 rounded-lg font-semibold transition"
+                            @click="startLoop($event)">
+                            Commit Crime
+                        </button>
+                        <button type="button" x-show="running" @click="stopLoop()"
+                            class="px-6 bg-red-700 hover:bg-red-600 py-3 rounded-lg font-semibold transition">
+                            Stop
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="crime-result" class="mt-4">
+            {{/* HTMX target for crime results */}}
+        </div>
+    </div>
+
+    <div>
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <h2 class="text-xs uppercase tracking-widest text-gray-500 mb-3">Your Stats</h2>
+            <div class="space-y-3 text-sm" id="player-stats">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Nerve</span>
+                    <span class="font-mono text-red-400" id="nerve-display">{{.Player.Nerve}} / {{.Player.NerveMax}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Level</span>
+                    <span class="font-mono text-cyan-400">{{.Player.Level}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Cash</span>
+                    <span class="font-mono text-green-400">${{printf "%d" .Player.Cash}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">EXP</span>
+                    <span class="font-mono">{{.Player.Exp}} / {{.Player.ExpMax}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function crimeRunner() {
+        return {
+            crimeId: '',
+            multiplier: 1,
+            running: false,
+            loopTimer: null,
+
+            startLoop(e) {
+                if (this.running) return;
+                this.running = true;
+                this.runOnce();
+            },
+
+            runOnce() {
+                if (!this.running || !this.crimeId) return;
+
+                const form = this.$refs.form;
+                const data = new FormData(form);
+
+                htmx.ajax('POST', '/crimes/commit', {
+                    target: '#crime-result',
+                    values: Object.fromEntries(data),
+                    swap: 'innerHTML',
+                }).then(() => {
+                    if (this.running) {
+                        this.loopTimer = setTimeout(() => this.runOnce(), 500);
+                    }
+                }).catch(() => {
+                    this.stopLoop();
+                });
+            },
+
+            stopLoop() {
+                this.running = false;
+                if (this.loopTimer) {
+                    clearTimeout(this.loopTimer);
+                    this.loopTimer = null;
+                }
+            }
+        };
+    }
+</script>
+{{end}}
