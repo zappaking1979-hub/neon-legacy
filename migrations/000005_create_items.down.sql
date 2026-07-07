@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS player_items;
+DROP TABLE IF EXISTS items;

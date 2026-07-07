@@ -1,0 +1,79 @@
+{{template "partials/head.html" .}}
+{{template "partials/nav.html" .}}
+
+<main class="max-w-7xl mx-auto px-4 py-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+        <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+            <div class="bg-gray-800/50 px-6 py-4 border-b border-gray-800">
+                <h1 class="font-bold">Inventory</h1>
+            </div>
+
+            <div class="p-6">
+                {{if .Items}}
+                <div class="space-y-4">
+                    {{range .Items}}
+                    <div class="bg-gray-800/50 rounded-lg p-4 border border-gray-700 flex items-center justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3">
+                                <span class="font-semibold text-lg">{{.Name}}</span>
+                                <span class="text-xs px-2 py-1 bg-gray-700 rounded">{{.Type}}</span>
+                                <span class="text-gray-500 text-sm">x{{.Quantity}}</span>
+                            </div>
+                            <p class="text-gray-400 text-sm mt-1">{{.Description}}</p>
+                        </div>
+                        <form hx-post="/inventory/use" hx-target="#inventory-result" hx-trigger="submit">
+                            <input type="hidden" name="id" value="{{.ID}}">
+                            <button type="submit"
+                                class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-medium transition disabled:opacity-50"
+                                {{if ne .Type "consumable"}}disabled{{end}}>
+                                {{if eq .Type "consumable"}}Use{{else}}Cannot Use{{end}}
+                            </button>
+                        </form>
+                    </div>
+                    {{end}}
+                </div>
+                {{else}}
+                <div class="text-center text-gray-500 py-12">
+                    <p class="text-lg">Your inventory is empty</p>
+                    <a href="/shop" class="text-cyan-400 hover:text-cyan-300 mt-4 inline-block">Visit the Shop</a>
+                </div>
+                {{end}}
+            </div>
+        </div>
+
+        <div id="inventory-result" class="mt-4">
+        </div>
+    </div>
+
+    <div>
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <h2 class="text-xs uppercase tracking-widest text-gray-500 mb-3">Your Stats</h2>
+            <div class="space-y-3 text-sm">
+                <div class="flex justify-between">
+                    <span class="text-gray-400">HP</span>
+                    <span class="font-mono text-green-400">{{.Player.HP}} / {{.Player.HPMax}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Energy</span>
+                    <span class="font-mono text-yellow-400">{{.Player.Energy}} / {{.Player.EnergyMax}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Nerve</span>
+                    <span class="font-mono text-red-400">{{.Player.Nerve}} / {{.Player.NerveMax}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Awake</span>
+                    <span class="font-mono text-purple-400">{{.Player.Awake}} / {{.Player.AwakeMax}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-400">Cash</span>
+                    <span class="font-mono text-green-400">${{printf "%d" .Player.Cash}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+
+{{template "partials/footer.html" .}}

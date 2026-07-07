@@ -62,11 +62,18 @@ func main() {
 	gymRepo := postgres.NewGymRepo(dbPool)
 	gymService := application.NewGymService(gymRepo, playerRepo)
 
+	itemRepo := postgres.NewItemRepo(dbPool)
+	playerItemRepo := postgres.NewPlayerItemRepo(dbPool)
+	shopService := application.NewShopService(itemRepo, playerItemRepo, playerRepo)
+	inventoryService := application.NewInventoryService(playerItemRepo, playerRepo)
+
 	tmpl := loadTemplates("web/templates")
 
 	authHandler := handlers.NewAuthHandler(authService, tmpl)
 	crimeHandler := handlers.NewCrimeHandler(crimeService, playerRepo, tmpl)
 	gymHandler := handlers.NewGymHandler(gymService, playerRepo, tmpl)
+	shopHandler := handlers.NewShopHandler(shopService, playerRepo, tmpl)
+	inventoryHandler := handlers.NewInventoryHandler(inventoryService, playerRepo, tmpl)
 
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
@@ -98,6 +105,11 @@ func main() {
 	r.Post("/crimes/commit", middleware.RequireAuth(crimeHandler.DoCrime))
 	r.Get("/gym", middleware.RequireAuth(gymHandler.Page))
 	r.Post("/gym/train", middleware.RequireAuth(gymHandler.Train))
+	r.Get("/shop", middleware.RequireAuth(shopHandler.Page))
+	r.Post("/shop/buy", middleware.RequireAuth(shopHandler.Buy))
+	r.Post("/shop/sell", middleware.RequireAuth(shopHandler.Sell))
+	r.Get("/inventory", middleware.RequireAuth(inventoryHandler.Page))
+	r.Post("/inventory/use", middleware.RequireAuth(inventoryHandler.Use))
 	r.Get("/api/me", middleware.RequireAuthAPI(authHandler.Me))
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {

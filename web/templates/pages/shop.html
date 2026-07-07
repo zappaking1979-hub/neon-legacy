@@ -1,0 +1,141 @@
+{{template "partials/head.html" .}}
+{{template "partials/nav.html" .}}
+
+<main class="max-w-7xl mx-auto px-4 py-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2">
+        <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+            <div class="bg-gray-800/50 px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+                <h1 class="font-bold">Item Shop</h1>
+                <span class="text-yellow-400 font-mono">${{.Player.Cash}}</span>
+            </div>
+
+            <div class="p-6">
+                <form hx-post="/shop/buy" hx-target="#shop-result" hx-trigger="submit" x-data="{ qty: 1 }" x-ref="form">
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-400 mb-2">Select item to buy</label>
+                        <select name="id" x-model="itemId" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+                            <option value="">-- Select an item --</option>
+                            {{range .Items}}
+                            <option value="{{.ID}}" data-price="{{.BuyPrice}}"
+                                {{if eq .Owned 0}}class="text-gray-100"{{else}}class="text-green-400"{{end}}>
+                                {{.Name}} - ${{.BuyPrice}} ({{.Type}}) - Owned: {{.Owned}}
+                            </option>
+                            {{end}}
+                        </select>
+                    </div>
+
+                    <div class="mb-6 flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm text-gray-400 mb-2">Quantity</label>
+                            <input type="number" name="qty" x-model="qty" min="1" max="999" value="1"
+                                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm text-gray-400 mb-2">Total</label>
+                            <input type="text" id="buy-total" readonly
+                                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm text-yellow-400 font-mono">
+                        </div>
+                    </div>
+
+                    <button type="submit" :disabled="!itemId"
+                        class="w-full bg-green-700 hover:bg-green-600 disabled:bg-gray-800 disabled:text-gray-600 py-3 rounded-lg font-semibold transition">
+                        Buy
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="shop-result" class="mt-4">
+        </div>
+    </div>
+
+    <div>
+        <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+            <h2 class="text-xs uppercase tracking-widest text-gray-500 mb-3">Your Cash</h2>
+            <div class="text-3xl font-mono text-yellow-400 mb-6">${{.Player.Cash}}</div>
+
+            <div class="bg-gray-800/50 rounded-lg p-4 mb-4">
+                <h3 class="font-semibold mb-2">Sell Items</h3>
+                <form hx-post="/shop/sell" hx-target="#shop-result" hx-trigger="submit" x-data="{ sellQty: 1 }" x-ref="sellForm">
+                    <div class="mb-4">
+                        <label class="block text-sm text-gray-400 mb-2">Select item to sell</label>
+                        <select name="id" x-model="sellId" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+                            <option value="">-- Select an item --</option>
+                            {{range .Items}}
+                            {{if gt .Owned 0}}
+                            <option value="{{.ID}}" data-price="{{.SellPrice}}">
+                                {{.Name}} - ${{.SellPrice}} (Owned: {{.Owned}})
+                            </option>
+                            {{end}}
+                            {{end}}
+                        </select>
+                    </div>
+
+                    <div class="mb-4 flex gap-4">
+                        <div class="flex-1">
+                            <label class="block text-sm text-gray-400 mb-2">Quantity</label>
+                            <input type="number" name="qty" x-model="sellQty" min="1" max="999" value="1"
+                                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-cyan-500">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm text-gray-400 mb-2">Total</label>
+                            <input type="text" id="sell-total" readonly
+                                class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm text-yellow-400 font-mono">
+                        </div>
+                    </div>
+
+                    <button type="submit" :disabled="!sellId"
+                        class="w-full bg-yellow-700 hover:bg-yellow-600 disabled:bg-gray-800 disabled:text-gray-600 py-3 rounded-lg font-semibold transition">
+                        Sell
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('shopCalc', () => ({
+            itemId: '',
+            qty: 1,
+            sellId: '',
+            sellQty: 1,
+
+            watch: {
+                itemId(val) {
+                    const opt = document.querySelector(`#buy-item option[value="${val}"]`);
+                    if (opt) {
+                        const price = parseInt(opt.dataset.price) || 0;
+                        document.getElementById('buy-total').value = '$' + (price * this.qty).toLocaleString();
+                    }
+                },
+                qty(val) {
+                    const opt = document.querySelector(`#buy-item option[value="${this.itemId}"]`);
+                    if (opt) {
+                        const price = parseInt(opt.dataset.price) || 0;
+                        document.getElementById('buy-total').value = '$' + (price * val).toLocaleString();
+                    }
+                },
+                sellId(val) {
+                    const opt = document.querySelector(`#sell-item option[value="${val}"]`);
+                    if (opt) {
+                        const price = parseInt(opt.dataset.price) || 0;
+                        document.getElementById('sell-total').value = '$' + (price * this.sellQty).toLocaleString();
+                    }
+                },
+                sellQty(val) {
+                    const opt = document.querySelector(`#sell-item option[value="${this.sellId}"]`);
+                    if (opt) {
+                        const price = parseInt(opt.dataset.price) || 0;
+                        document.getElementById('sell-total').value = '$' + (price * val).toLocaleString();
+                    }
+                }
+            }
+        }));
+    });
+</script>
+</main>
+
+{{template "partials/footer.html" .}}
