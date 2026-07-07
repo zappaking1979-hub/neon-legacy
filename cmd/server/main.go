@@ -59,10 +59,14 @@ func main() {
 	crimeRepo := postgres.NewCrimeRepo(dbPool)
 	crimeService := application.NewCrimeService(crimeRepo, playerRepo)
 
+	gymRepo := postgres.NewGymRepo(dbPool)
+	gymService := application.NewGymService(gymRepo, playerRepo)
+
 	tmpl := loadTemplates("web/templates")
 
 	authHandler := handlers.NewAuthHandler(authService, tmpl)
 	crimeHandler := handlers.NewCrimeHandler(crimeService, playerRepo, tmpl)
+	gymHandler := handlers.NewGymHandler(gymService, playerRepo, tmpl)
 
 	r := chi.NewRouter()
 	r.Use(chimw.Logger)
@@ -92,6 +96,8 @@ func main() {
 	r.Get("/dashboard", middleware.RequireAuth(authHandler.Dashboard))
 	r.Get("/crimes", middleware.RequireAuth(crimeHandler.Page))
 	r.Post("/crimes/commit", middleware.RequireAuth(crimeHandler.DoCrime))
+	r.Get("/gym", middleware.RequireAuth(gymHandler.Page))
+	r.Post("/gym/train", middleware.RequireAuth(gymHandler.Train))
 	r.Get("/api/me", middleware.RequireAuthAPI(authHandler.Me))
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {

@@ -152,3 +152,27 @@ func (p *Player) RegenAwake(amount int) {
 		p.Awake = p.AwakeMax
 	}
 }
+
+func (p *Player) SpendEnergy(amount int) bool {
+	if p.Energy < amount {
+		return false
+	}
+	p.Energy -= amount
+	return true
+}
+
+func (p *Player) TrainStrength(amount int) {
+	p.Strength += amount
+}
+
+func (p *Player) TrainDefense(amount int) {
+	p.Defense += amount
+}
+
+func (p *Player) TrainSpeed(amount int) {
+	p.Speed += amount
+}
+
+func (p *Player) TrainAgility(amount int) {
+	p.Agility += amount
+}
