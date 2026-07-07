@@ -1,0 +1,7 @@
+neonlegacy.io {
+    reverse_proxy app:8080
+}
+
+chat.neonlegacy.io {
+    reverse_proxy centrifugo:8000
+}

@@ -1,0 +1,29 @@
+# Binaries
+tmp/
+neon-server
+*.exe
+
+# Environment
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tailwind
+node_modules/
+package-lock.json
+
+# Coverage
+coverage.out
+coverage.html
+
+# Docker
+.pgdata
+.redisdata

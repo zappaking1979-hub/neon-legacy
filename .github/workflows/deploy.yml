@@ -1,0 +1,71 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+env:
+  GO_VERSION: "1.24"
+  DEPLOY_HOST: 161.153.38.182
+  DEPLOY_USER: ubuntu
+  DEPLOY_PATH: /home/ubuntu/neon-legacy
+  SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - run: go mod download
+      - run: go vet ./...
+      - run: go test ./... -count=1
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Build binary
+        run: |
+          CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o neon-server ./cmd/server
+
+      - name: Copy files via SCP
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ env.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+          scp -i ~/.ssh/deploy_key neon-server ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:${{ env.DEPLOY_PATH }}/neon-server.new
+          scp -i ~/.ssh/deploy_key docker-compose.yml ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:${{ env.DEPLOY_PATH }}/docker-compose.yml
+          rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" migrations/ ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:${{ env.DEPLOY_PATH }}/migrations/
+          rsync -avz --delete -e "ssh -i ~/.ssh/deploy_key" web/ ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }}:${{ env.DEPLOY_PATH }}/web/
+
+      - name: Deploy
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ env.DEPLOY_USER }}@${{ env.DEPLOY_HOST }} << 'EOF'
+            cd ${{ env.DEPLOY_PATH }}
+            mv neon-server.new neon-server
+            chmod +x neon-server
+            sudo cp neon-server /usr/local/bin/neon-server
+            sudo cp docker-compose.yml /opt/neon-legacy/docker-compose.yml
+            sudo cp -r migrations /opt/neon-legacy/
+            sudo cp -r web /opt/neon-legacy/
+            cd /opt/neon-legacy
+            sudo docker compose pull
+            sudo docker compose up -d --build
+            sudo docker system prune -f
+          EOF

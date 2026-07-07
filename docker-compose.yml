@@ -1,0 +1,66 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: "8080"
+      ENVIRONMENT: "development"
+      DATABASE_URL: "postgres://neon:neon@db:5432/neonlegacy?sslmode=disable"
+      REDIS_URL: "redis://redis:6379"
+      SESSION_KEY: "dev-session-key-change-in-production"
+      CORS_ORIGIN: "http://localhost:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: neon
+      POSTGRES_PASSWORD: neon
+      POSTGRES_DB: neonlegacy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neon -d neonlegacy"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - redisdata:/data
+
+  centrifugo:
+    image: centrifugo/centrifugo:v5
+    ports:
+      - "8000:8000"
+    environment:
+      CENTRIFUGO_TOKEN_HMAC_SECRET_KEY: "change-me"
+      CENTRIFUGO_ALLOWED_ORIGINS: "http://localhost:8080"
+      CENTRIFUGO_ADMIN: "true"
+      CENTRIFUGO_ADMIN_PASSWORD: "admin"
+      CENTRIFUGO_ADMIN_SECRET: "admin"
+    command: centrifugo
+    volumes:
+      - centrifugodata:/data
+
+volumes:
+  pgdata:
+  redisdata:
+  centrifugodata:

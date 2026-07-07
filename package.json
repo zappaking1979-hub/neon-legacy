@@ -1,0 +1,11 @@
+{
+  "name": "neon-legacy",
+  "private": true,
+  "scripts": {
+    "css:watch": "tailwindcss -i ./web/static/css/input.css -o ./web/static/css/style.css --watch",
+    "css:build": "tailwindcss -i ./web/static/css/input.css -o ./web/static/css/style.css --minify"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

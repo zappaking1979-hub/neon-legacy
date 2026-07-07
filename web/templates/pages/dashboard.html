@@ -1,0 +1,115 @@
+{{template "layout/base.html" .}}
+
+{{define "content"}}
+{{if .welcome}}
+<div class="bg-green-900/30 border border-green-700 text-green-300 px-6 py-4 rounded-xl mb-6 text-center text-lg font-semibold">
+    Welcome to Neon Legacy, {{.welcome}}!
+</div>
+{{end}}
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+        <h2 class="text-xs uppercase tracking-widest text-gray-500 mb-3">Player Stats</h2>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-400">Level</span>
+                <span class="font-mono text-cyan-400">{{.Player.Level}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">Prestige</span>
+                <span class="font-mono text-cyan-400">{{.Player.Prestige}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">EXP</span>
+                <span class="font-mono">{{.Player.Exp}} / {{.Player.ExpMax}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+        <h2 class="text-xs uppercase tracking-widest text-gray-500 mb-3">Resources</h2>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-400">HP</span>
+                <span class="font-mono text-green-400">{{.Player.HP}} / {{.Player.HPMax}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">Energy</span>
+                <span class="font-mono text-yellow-400">{{.Player.Energy}} / {{.Player.EnergyMax}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">Nerve</span>
+                <span class="font-mono text-red-400">{{.Player.Nerve}} / {{.Player.NerveMax}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">Awake</span>
+                <span class="font-mono text-purple-400">{{.Player.Awake}} / {{.Player.AwakeMax}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+        <h2 class="text-xs uppercase tracking-widest text-gray-500 mb-3">Finances</h2>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-400">Cash</span>
+                <span class="font-mono text-green-400">${{printf "%d" .Player.Cash}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">Bank</span>
+                <span class="font-mono text-blue-400">${{printf "%d" .Player.Bank}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">Points</span>
+                <span class="font-mono text-yellow-400">{{.Player.Points}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">Credits</span>
+                <span class="font-mono text-purple-400">{{.Player.Credits}}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+    <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+        <h2 class="text-xs uppercase tracking-widest text-gray-500 mb-3">Combat Stats</h2>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-400">Strength</span>
+                <span class="font-mono">{{.Player.Strength}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">Defense</span>
+                <span class="font-mono">{{.Player.Defense}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">Speed</span>
+                <span class="font-mono">{{.Player.Speed}}</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">Agility</span>
+                <span class="font-mono">{{.Player.Agility}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-900 rounded-xl p-6 border border-gray-800">
+        <h2 class="text-xs uppercase tracking-widest text-gray-500 mb-3">Quick Actions</h2>
+        <div class="grid grid-cols-2 gap-3">
+            <a href="#" class="bg-gray-800 hover:bg-gray-700 text-center py-3 rounded-lg text-sm transition border border-gray-700">
+                Crimes
+            </a>
+            <a href="#" class="bg-gray-800 hover:bg-gray-700 text-center py-3 rounded-lg text-sm transition border border-gray-700">
+                Gym
+            </a>
+            <a href="#" class="bg-gray-800 hover:bg-gray-700 text-center py-3 rounded-lg text-sm transition border border-gray-700">
+                Gang
+            </a>
+            <a href="#" class="bg-gray-800 hover:bg-gray-700 text-center py-3 rounded-lg text-sm transition border border-gray-700">
+                Attack
+            </a>
+        </div>
+    </div>
+</div>
+{{end}}
